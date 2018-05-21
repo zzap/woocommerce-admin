@@ -32,6 +32,16 @@ const wordPressPackages = [
 module.exports = {
 	styleguideDir: 'dist/styleguide',
 	components: 'client/components/**/*.{js,jsx}',
+	sections: [
+		{
+			name: 'UI Components',
+			components: 'client/components/**/*.{js,jsx}',
+		},
+		{
+			name: 'Higher Order Components',
+			content: 'client/components/higher-order/README.md',
+		},
+	],
 	ignore: [
 		'**/client/components/higher-order/**/*.{js,jsx}',
 		'**/test/**',
