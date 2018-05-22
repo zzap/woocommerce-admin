@@ -12,6 +12,10 @@ import PropTypes from 'prop-types';
 import './style.scss';
 import { EllipsisMenu } from '../ellipsis-menu';
 
+/**
+ * A basic card component with a header. The header can contain a title (required), an action (optional),
+ * and an `EllipsisMenu` menu (optional).
+*/
 class Card extends Component {
 	render() {
 		const { action, children, menu, title } = this.props;
@@ -33,11 +37,15 @@ class Card extends Component {
 }
 
 Card.propTypes = {
+	/** One "primary" action for this card, appears in the card header */
 	action: PropTypes.node,
+	/** Extra classes to add to the card container. */
 	className: PropTypes.string,
+	/** An EllipsisMenu, with filters used to control the content visible in this card */
 	menu: PropTypes.shape( {
-		type: PropTypes.oneOf( [ EllipsisMenu ] ),
+		type: EllipsisMenu,
 	} ),
+	/** The title to use for this card. */
 	title: PropTypes.string.isRequired,
 };
 

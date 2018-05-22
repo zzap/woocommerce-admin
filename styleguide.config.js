@@ -31,11 +31,14 @@ const wordPressPackages = [
 
 module.exports = {
 	styleguideDir: 'dist/styleguide',
-	components: 'client/components/**/*.{js,jsx}',
 	sections: [
 		{
 			name: 'UI Components',
 			components: 'client/components/**/*.{js,jsx}',
+			ignore: [
+				'**/client/components/header/index.js',
+				'**/client/components/ellipsis-menu/index.js',
+			],
 		},
 		{
 			name: 'Higher Order Components',
@@ -52,6 +55,9 @@ module.exports = {
 		// Set up the wp.* globals
 		path.join( __dirname, 'client/styleguide/setup-globals.js' ),
 	],
+	getExampleFilename( componentPath ) {
+		return path.dirname( componentPath ) + '/Example.md';
+	},
 	dangerouslyUpdateWebpackConfig( webpackConfig ) {
 		webpackConfig = merge.smart( webpackConfig, {
 			externals: {
