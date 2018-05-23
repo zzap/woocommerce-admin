@@ -1,6 +1,11 @@
 /** @format */
+const fs = require( 'fs' );
 const path = require( 'path' );
 const merge = require( 'webpack-merge' );
+
+function getStyleguidePath( ...paths ) {
+	return fs.realpathSync( path.join( __dirname, 'client/styleguide/', ...paths ) );
+}
 
 const gutenbergEntries = [
 	'blocks',
@@ -44,6 +49,10 @@ module.exports = {
 			name: 'Higher Order Components',
 			content: 'client/components/higher-order/README.md',
 		},
+		{
+			name: 'Layout Components',
+			components: 'client/layout/**/*.{js,jsx}',
+		},
 	],
 	ignore: [
 		'**/client/components/higher-order/**/*.{js,jsx}',
@@ -53,8 +62,31 @@ module.exports = {
 	],
 	require: [
 		// Set up the wp.* globals
-		path.join( __dirname, 'client/styleguide/setup-globals.js' ),
+		getStyleguidePath( 'setup-globals.js' ),
 	],
+	template: {
+		head: {
+			// Add gutenberg CSS
+			links: [
+				{
+					rel: 'stylesheet',
+					href: 'client/styleguide/components.css',
+				},
+				{
+					rel: 'stylesheet',
+					href: 'client/styleguide/core-blocks.css',
+				},
+				{
+					rel: 'stylesheet',
+					href: 'client/styleguide/edit-post.css',
+				},
+				{
+					rel: 'stylesheet',
+					href: 'client/styleguide/editor.css',
+				},
+			],
+		},
+	},
 	getExampleFilename( componentPath ) {
 		return path.dirname( componentPath ) + '/Example.md';
 	},
@@ -77,6 +109,10 @@ module.exports = {
 						test: /\.scss$/,
 						include: /node_modules\/gutenberg/,
 						loader: 'ignore-loader',
+					},
+					{
+						test: /\.css$/,
+						loader: 'css-loader',
 					},
 				],
 			},
