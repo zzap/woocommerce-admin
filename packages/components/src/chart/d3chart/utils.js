@@ -794,22 +794,25 @@ export const drawBars = ( node, data, params ) => {
 	barGroup
 		.selectAll( '.bar' )
 		.data( d =>
-			params.orderedKeys.filter( row => row.visible ).map( row => ( {
-				key: row.key,
-				focus: row.focus,
-				value: get( d, [ row.key, 'value' ], 0 ),
-				label: get( d, [ row.key, 'label' ], '' ),
-				visible: row.visible,
-				date: d.date,
-			} ) )
+			params.orderedKeys.map( row => {
+				const { date, focus, key, visible } = row;
+				const value = get( d, [ key, 'value' ], 0 );
+				const y = params.yScale( value );
+				const height = params.height - y;
+				if ( ! visible || height <= 0 ) {
+					return null;
+				}
+				const label = get( d, [ key, 'label' ], '' );
+				return { date, focus, height, key, label, value, visible, y };
+			} ).filter( Boolean )
 		)
 		.enter()
 		.append( 'rect' )
 		.attr( 'class', 'bar' )
 		.attr( 'x', d => params.xGroupScale( d.key ) )
-		.attr( 'y', d => params.yScale( d.value ) )
+		.attr( 'y', d => d.y )
 		.attr( 'width', params.xGroupScale.bandwidth() )
-		.attr( 'height', d => params.height - params.yScale( d.value ) )
+		.attr( 'height', d => d.height )
 		.attr( 'fill', d => getColor( d.key, params ) )
 		.attr( 'tabindex', '0' )
 		.attr( 'aria-label', d => {
