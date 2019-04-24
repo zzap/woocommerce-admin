@@ -60,6 +60,8 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 			}
 		}
 
+		do_action( 'woocommerce_rest_report_products_before', $args );
+
 		$reports       = new WC_Admin_Reports_Products_Query( $args );
 		$products_data = $reports->get_data();
 
@@ -162,6 +164,18 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
 					'description' => __( 'Number of items sold.', 'woocommerce-admin' ),
+				),
+				'views'         => array(
+					'type'        => 'integer',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'Number of product views.', 'woocommerce-admin' ),
+				),
+				'add_to_carts'  => array(
+					'type'        => 'integer',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'Number of add to cart actions.', 'woocommerce-admin' ),
 				),
 				'net_revenue'   => array(
 					'type'        => 'number',

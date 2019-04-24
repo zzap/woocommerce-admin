@@ -48,6 +48,18 @@ class ProductsReportTable extends Component {
 				isSortable: true,
 			},
 			{
+				label: __( 'Product Views', 'woocommerce-admin' ),
+				key: 'product_views',
+				isSortable: false,
+				isNumeric: true,
+			},
+			{
+				label: __( 'Add To Carts', 'woocommerce-admin' ),
+				key: 'add_to_carts',
+				isSortable: false,
+				isNumeric: true,
+			},
+			{
 				label: __( 'Items Sold', 'woocommerce-admin' ),
 				key: 'items_sold',
 				required: true,
@@ -100,7 +112,15 @@ class ProductsReportTable extends Component {
 		const persistedQuery = getPersistedQuery( query );
 
 		return map( data, row => {
-			const { product_id, items_sold, net_revenue, orders_count } = row;
+			// @todo Inject new rows & headers with a filter.
+			const {
+				product_id,
+				product_views,
+				add_to_carts,
+				items_sold,
+				net_revenue,
+				orders_count,
+			} = row;
 			const extended_info = row.extended_info || {};
 			const {
 				category_ids,
@@ -147,6 +167,14 @@ class ProductsReportTable extends Component {
 				{
 					display: sku,
 					value: sku,
+				},
+				{
+					display: numberFormat( product_views ),
+					value: product_views,
+				},
+				{
+					display: numberFormat( add_to_carts ),
+					value: add_to_carts,
 				},
 				{
 					display: numberFormat( items_sold ),
