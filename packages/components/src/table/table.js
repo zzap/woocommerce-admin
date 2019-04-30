@@ -116,7 +116,7 @@ class Table extends Component {
 			'is-scrollable': isScrollable,
 		} );
 		const sortedBy = query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
-		const sortDir = query.order || DESC;
+		const sortDir = query.order ? query.order.toUpperCase() : DESC;
 
 		return (
 			<div
