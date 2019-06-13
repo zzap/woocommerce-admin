@@ -4,8 +4,9 @@
  */
 import { Component, createElement } from '@wordpress/element';
 import { parse } from 'qs';
-import { find, last, isEqual } from 'lodash';
+import { find, isEqual } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
+import { matchPath } from 'react-router-dom';
 
 /**
  * WooCommerce dependencies
@@ -31,13 +32,13 @@ const getPages = () => {
 			container: DevDocs,
 			path: '/devdocs',
 			wpOpenMenu: 'toplevel_page_woocommerce',
-			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpClosedMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 		pages.push( {
 			container: DevDocs,
 			path: '/devdocs/:component',
 			wpOpenMenu: 'toplevel_page_woocommerce',
-			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpClosedMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 	}
 
@@ -46,7 +47,7 @@ const getPages = () => {
 			container: Dashboard,
 			path: '/',
 			wpOpenMenu: 'toplevel_page_woocommerce',
-			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpClosedMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 	}
 
@@ -54,19 +55,19 @@ const getPages = () => {
 		pages.push( {
 			container: Analytics,
 			path: '/analytics',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 			wpClosedMenu: 'toplevel_page_woocommerce',
 		} );
 		pages.push( {
 			container: AnalyticsSettings,
 			path: '/analytics/settings',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 			wpClosedMenu: 'toplevel_page_woocommerce',
 		} );
 		pages.push( {
 			container: AnalyticsReport,
 			path: '/analytics/:report',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 			wpClosedMenu: 'toplevel_page_woocommerce',
 		} );
 	}
@@ -108,19 +109,46 @@ class Controller extends Component {
 		return query;
 	}
 
+	getRouteMatch( query ) {
+		const pages = getPages();
+		let routeMatch = null;
+
+		const path = query.path ? query.path : '/';
+		pages.forEach( page => {
+			const matched = matchPath( path, { path: page.path, exact: true } );
+			if ( matched ) {
+				routeMatch = matched;
+				return;
+			}
+		} );
+
+		return routeMatch;
+	}
+
+	// @todo What should we display or do when a route/page doesn't exist?
+	render404() {
+		return null;
+	}
+
 	render() {
-		// Pass URL parameters (example :report -> params.report) and query string parameters
-		const { path, url, params } = this.props.match;
 		const query = this.getQuery( this.props.location.search );
+		// Pass URL parameters (example :report -> params.report) and query string parameters
+		const match = this.getRouteMatch( query );
+
+		if ( ! match ) {
+			return this.render404();
+		}
+
+		const { path, url, params } = match;
 		const page = find( getPages(), { path } );
 
 		if ( ! page ) {
-			return null; // @todo What should we display or do when a route/page doesn't exist?
+			return this.render404();
 		}
 
 		window.wpNavMenuUrlUpdate( page, query );
-		window.wpNavMenuClassChange( page );
-		return createElement( page.container, { params, path: url, pathMatch: path, query } );
+		window.wpNavMenuClassChange( page, url );
+		return createElement( page.container, { params, path: url, pathMatch: page.path, query } );
 	}
 }
 
@@ -138,35 +166,32 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 	 * The groupings are as follows:
 	 *
 	 * 0 - Full match
-	 * 1 - "#/" (optional)
-	 * 2 - "analytics/" (optional)
-	 * 3 - Any string, eg "orders"
-	 * 4 - "?" or end of line
+	 * 1 - Path, eg "/analytics/orders"
+	 * 2 - "?" or end of line
 	 */
-	const _exp = /page=wc-admin(#\/)?(analytics\/)?(.*?)(\?|$)/;
+	const _exp = /admin.php\?page=wc-admin&path=(.*?)(\&|$)/;
 	const wcAdminMatches = item.href.match( _exp );
 
 	if ( wcAdminMatches ) {
-		// Get fourth grouping
-		const screen = wcAdminMatches[ 3 ];
-
-		if ( ! excludedScreens.includes( screen ) ) {
-			const url = item.href.split( 'wc-admin' );
-			const hashUrl = last( url );
-			const base = hashUrl.split( '?' )[ 0 ];
-			const href = `${ url[ 0 ] }wc-admin${ '#' === base[ 0 ] ? '' : '#/' }${ base }${ nextQuery }`;
-			item.href = href;
-		}
+		const screen = wcAdminMatches[ 1 ];
+		item.onclick = e => {
+			e.preventDefault();
+			let href = 'admin.php?page=wc-admin&path=' + encodeURIComponent( screen );
+			if ( ! excludedScreens.includes( screen ) ) {
+				href += nextQuery.replace( '?', '&' );
+			}
+			getHistory().push( href );
+		};
 	}
 }
 
-// Update links in wp-admin menu to persist time related queries
+// Update's wc-admin links in wp-admin menu
 window.wpNavMenuUrlUpdate = function( page, query ) {
 	const excludedScreens = applyFilters( TIME_EXCLUDED_SCREENS_FILTER, [
-		'devdocs',
-		'stock',
-		'settings',
-		'customers',
+		'/devdocs',
+		'/analytics/stock',
+		'/analytics/settings',
+		'/analytics/customers',
 	] );
 	const nextQuery = stringifyQuery( getPersistedQuery( query ) );
 
@@ -176,7 +201,7 @@ window.wpNavMenuUrlUpdate = function( page, query ) {
 };
 
 // When the route changes, we need to update wp-admin's menu with the correct section & current link
-window.wpNavMenuClassChange = function( page ) {
+window.wpNavMenuClassChange = function( page, url ) {
 	Array.from( document.getElementsByClassName( 'current' ) ).forEach( function( item ) {
 		item.classList.remove( 'current' );
 	} );
@@ -190,11 +215,11 @@ window.wpNavMenuClassChange = function( page ) {
 		element.classList.add( 'menu-top' );
 	} );
 
-	const pageHash = window.location.hash.split( '?' )[ 0 ];
+	const pageUrl = '/' === url ? 'admin.php?page=wc-admin' : 'admin.php?page=wc-admin&path=' + url;
 	const currentItemsSelector =
-		pageHash === '#/'
-			? `li > a[href$="${ pageHash }"], li > a[href*="${ pageHash }?"]`
-			: `li > a[href*="${ pageHash }"]`;
+		url === '/'
+			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
+			: `li > a[href*="${ pageUrl }"]`;
 	const currentItems = document.querySelectorAll( currentItemsSelector );
 
 	Array.from( currentItems ).forEach( function( item ) {
