@@ -104,7 +104,8 @@ class WC_Admin_Page_Controller {
 
 		$current_query = wp_parse_url( $current_url, PHP_URL_QUERY );
 		parse_str( $current_query, $current_pieces );
-		$current_path = empty( $current_pieces['path'] ) ? 'wc-admin' : 'wc-admin&path=' . $current_pieces['path'];
+		$current_path = empty( $current_pieces['page'] ) ? '' : $current_pieces['page'];
+		$current_path .= empty( $current_pieces['path'] ) ? '' : '&path=' . $current_pieces['path'];
 
 		foreach ( $this->pages as $page ) {
 			if ( isset( $page['js_page'] ) && $page['js_page'] ) {
