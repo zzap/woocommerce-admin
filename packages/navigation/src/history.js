@@ -10,8 +10,9 @@ let _history;
 
 function getHistory() {
 	if ( ! _history ) {
+		const path = document.location.pathname;
 		_history = createBrowserHistory( {
-			basename: '/wp-admin',
+			basename: path.substring( 0, path.lastIndexOf( '/' ) ),
 		} );
 	}
 	return _history;
