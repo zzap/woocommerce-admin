@@ -157,7 +157,7 @@ class Controller extends Component {
  * as is.
  *
  * @param {HTMLElement} item - Sidebar anchor link.
- * @param {string} nextQuery - A query string to be added to updated hrefs.
+ * @param {object} nextQuery - A query object to be added to updated hrefs.
  * @param {Array} excludedScreens - wc-admin screens to avoid updating.
  */
 export function updateLinkHref( item, nextQuery, excludedScreens ) {
