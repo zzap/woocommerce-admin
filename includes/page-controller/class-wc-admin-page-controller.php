@@ -104,7 +104,7 @@ class WC_Admin_Page_Controller {
 
 		$current_query = wp_parse_url( $current_url, PHP_URL_QUERY );
 		parse_str( $current_query, $current_pieces );
-		$current_path = empty( $current_pieces['page'] ) ? '' : $current_pieces['page'];
+		$current_path  = empty( $current_pieces['page'] ) ? '' : $current_pieces['page'];
 		$current_path .= empty( $current_pieces['path'] ) ? '' : '&path=' . $current_pieces['path'];
 
 		foreach ( $this->pages as $page ) {
@@ -190,9 +190,6 @@ class WC_Admin_Page_Controller {
 		if ( is_null( $this->current_page ) ) {
 			$this->determine_current_page();
 		}
-
-		error_log( 'Current Page:' );
-		error_log( print_r( $this->current_page, 1 ) );
 
 		return $this->current_page;
 	}
