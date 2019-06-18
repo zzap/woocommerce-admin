@@ -131,7 +131,7 @@ class Controller extends Component {
 	}
 
 	render() {
-		const query = this.getQuery( this.props.location.search );
+		const query = this.getBaseQuery( this.props.location.search );
 		// Pass URL parameters (example :report -> params.report) and query string parameters
 		const match = this.getRouteMatch( query );
 
