@@ -3,15 +3,15 @@
  * External dependencies
  */
 import { Component, createElement } from '@wordpress/element';
-import { parse } from 'qs';
-import { find, isEqual } from 'lodash';
+import { parse, stringify } from 'qs';
+import { find, isEqual, last } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 import { matchPath } from 'react-router-dom';
 
 /**
  * WooCommerce dependencies
  */
-import { getNewPath, getPersistedQuery, getHistory, stringifyQuery } from '@woocommerce/navigation';
+import { getNewPath, getPersistedQuery, getHistory } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -161,25 +161,24 @@ class Controller extends Component {
  * @param {Array} excludedScreens - wc-admin screens to avoid updating.
  */
 export function updateLinkHref( item, nextQuery, excludedScreens ) {
-	/**
-	 * Regular expression for finding any WooCommerce Admin screen.
-	 * The groupings are as follows:
-	 *
-	 * 0 - Full match
-	 * 1 - Path, eg "/analytics/orders"
-	 * 2 - "?" or end of line
-	 */
-	const _exp = /admin.php\?page=wc-admin&path=(.*?)(\&|$)/;
-	const wcAdminMatches = item.href.match( _exp );
+	const isWCAdmin = /admin.php\?page=wc-admin/.test( item.href );
 
-	if ( wcAdminMatches ) {
-		const screen = wcAdminMatches[ 1 ];
+	if ( isWCAdmin ) {
+		const search = last( item.href.split( '?' ) );
+		const query = parse( search );
+		const path = query.path || 'dashboard';
+		const screen = path.replace( '/analytics', '' ).replace( '/', '' );
+
+		const isExcludedScreen = excludedScreens.includes( screen );
+
+		const href =
+			'admin.php?' + stringify( Object.assign( query, isExcludedScreen ? {} : nextQuery ) );
+
+		// Replace the href so you can see the url on hover.
+		item.href = href;
+
 		item.onclick = e => {
 			e.preventDefault();
-			let href = 'admin.php?page=wc-admin&path=' + encodeURIComponent( screen );
-			if ( ! excludedScreens.includes( screen ) ) {
-				href += nextQuery.replace( '?', '&' );
-			}
 			getHistory().push( href );
 		};
 	}
@@ -188,12 +187,12 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 // Update's wc-admin links in wp-admin menu
 window.wpNavMenuUrlUpdate = function( page, query ) {
 	const excludedScreens = applyFilters( TIME_EXCLUDED_SCREENS_FILTER, [
-		'/devdocs',
-		'/analytics/stock',
-		'/analytics/settings',
-		'/analytics/customers',
+		'devdocs',
+		'stock',
+		'settings',
+		'customers',
 	] );
-	const nextQuery = stringifyQuery( getPersistedQuery( query ) );
+	const nextQuery = getPersistedQuery( query );
 
 	Array.from(
 		document.querySelectorAll( `#${ page.wpOpenMenu } a, #${ page.wpClosedMenu } a` )
