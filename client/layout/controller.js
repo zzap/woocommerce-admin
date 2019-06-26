@@ -109,21 +109,21 @@ class Controller extends Component {
 		return query;
 	}
 
-	getRouteMatch( query ) {
-		const pages = getPages();
-		let routeMatch = null;
-
-		const path = query.path ? query.path : '/';
-		pages.forEach( page => {
-			const matched = matchPath( path, { path: page.path, exact: true } );
-			if ( matched ) {
-				routeMatch = matched;
-				return;
-			}
-		} );
-
-		return routeMatch;
-	}
+	// getRouteMatch( query ) {
+	// 	const pages = getPages();
+	// 	let routeMatch = null;
+	//
+	// 	const path = query.path ? query.path : '/';
+	// 	pages.forEach( page => {
+	// 		const matched = matchPath( path, { path: page.path, exact: true } );
+	// 		if ( matched ) {
+	// 			routeMatch = matched;
+	// 			return;
+	// 		}
+	// 	} );
+	//
+	// 	return routeMatch;
+	// }
 
 	// @todo What should we display or do when a route/page doesn't exist?
 	render404() {
@@ -131,10 +131,11 @@ class Controller extends Component {
 	}
 
 	render() {
-		const query = this.getBaseQuery( this.props.location.search );
-		// Pass URL parameters (example :report -> params.report) and query string parameters
-		const match = this.getRouteMatch( query );
+		console.log( 'rending' );
+		const { location, match } = this.props;
+		const query = this.getBaseQuery( location.search );
 
+		// Not sure this belongs here, will never get called.
 		if ( ! match ) {
 			return this.render404();
 		}
