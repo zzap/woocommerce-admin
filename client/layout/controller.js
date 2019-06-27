@@ -4,9 +4,8 @@
  */
 import { Component, createElement } from '@wordpress/element';
 import { parse, stringify } from 'qs';
-import { find, isEqual, last } from 'lodash';
+import { isEqual, last } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
-import { matchPath } from 'react-router-dom';
 
 /**
  * WooCommerce dependencies
@@ -109,38 +108,15 @@ class Controller extends Component {
 		return query;
 	}
 
-	getRouteMatch( query ) {
-		const pages = getPages();
-		let routeMatch = null;
-
-		const path = query.path ? query.path : '/';
-		pages.forEach( page => {
-			const matched = matchPath( path, { path: page.path, exact: true } );
-			if ( matched ) {
-				routeMatch = matched;
-				return;
-			}
-		} );
-
-		return routeMatch;
-	}
-
 	// @todo What should we display or do when a route/page doesn't exist?
 	render404() {
 		return null;
 	}
 
 	render() {
-		const query = this.getBaseQuery( this.props.location.search );
-		// Pass URL parameters (example :report -> params.report) and query string parameters
-		const match = this.getRouteMatch( query );
-
-		if ( ! match ) {
-			return this.render404();
-		}
-
-		const { path, url, params } = match;
-		const page = find( getPages(), { path } );
+		const { page, match, location } = this.props;
+		const { url, params } = match;
+		const query = this.getBaseQuery( location.search );
 
 		if ( ! page ) {
 			return this.render404();
@@ -214,7 +190,10 @@ window.wpNavMenuClassChange = function( page, url ) {
 		element.classList.add( 'menu-top' );
 	} );
 
-	const pageUrl = '/' === url ? 'admin.php?page=wc-admin' : 'admin.php?page=wc-admin&path=' + url;
+	const pageUrl =
+		'/' === url
+			? 'admin.php?page=wc-admin'
+			: 'admin.php?page=wc-admin&path=' + encodeURIComponent( url );
 	const currentItemsSelector =
 		url === '/'
 			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
