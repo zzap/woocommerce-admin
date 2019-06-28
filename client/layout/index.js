@@ -95,42 +95,41 @@ Layout.propTypes = {
 	isEmbedded: PropTypes.bool,
 };
 
-function getRouteMatch( query ) {
-	const pages = getPages();
-	let routeMatch = null;
-
-	const path = query.path ? query.path : '/';
-	pages.forEach( page => {
-		const matched = matchPath( path, { path: page.path, exact: true } );
-		if ( matched ) {
-			routeMatch = matched;
-			return;
-		}
-	} );
-
-	return routeMatch;
-}
-
 export class Router extends Component {
 	constructor( props ) {
 		super( props );
 
+		// Initialize state.
 		const history = getHistory();
-		this.unlisten = history.listen( () => {
-			this.setState( { match: this.getMatch( window.location.search ) } );
-		} );
-		const match = this.getMatch( window.location.search );
-
+		const match = this.getRouteMatch( window.location.search );
 		this.state = { history, match };
+
+		// listen for route changes and appropriately setState to re-render.
+		this.unlisten = history.listen( () => {
+			const nextMatch = this.getRouteMatch( window.location.search );
+			this.setState( { match: nextMatch } );
+		} );
 	}
 
 	componentWillUnmount() {
 		this.unlisten();
 	}
 
-	getMatch( search ) {
+	getRouteMatch( search ) {
 		const query = getBaseQuery( search );
-		return getRouteMatch( query );
+		const pages = getPages();
+		let routeMatch = null;
+
+		const path = query.path ? query.path : '/';
+		pages.forEach( page => {
+			const matched = matchPath( path, { path: page.path, exact: true } );
+			if ( matched ) {
+				routeMatch = matched;
+				return;
+			}
+		} );
+
+		return routeMatch;
 	}
 
 	render() {
