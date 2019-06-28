@@ -9,13 +9,13 @@ import { Provider as SlotFillProvider } from 'react-slot-fill';
  * Internal dependencies
  */
 import './stylesheets/_index.scss';
-import { PageLayout } from './layout';
+import { Router } from './layout';
 import 'store';
 import 'wc-api/wp-data-store';
 
 render(
 	<SlotFillProvider>
-		<PageLayout />
+		<Router />
 	</SlotFillProvider>,
 	document.getElementById( 'root' )
 );

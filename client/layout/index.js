@@ -111,11 +111,30 @@ function getRouteMatch( query ) {
 	return routeMatch;
 }
 
-export class PageLayout extends Component {
-	render() {
-		const query = getBaseQuery( window.location.search );
-		const match = getRouteMatch( query );
+export class Router extends Component {
+	constructor( props ) {
+		super( props );
+
 		const history = getHistory();
+		this.unlisten = history.listen( () => {
+			this.setState( { match: this.getMatch( window.location.search ) } );
+		} );
+		const match = this.getMatch( window.location.search );
+
+		this.state = { history, match };
+	}
+
+	componentWillUnmount() {
+		this.unlisten();
+	}
+
+	getMatch( search ) {
+		const query = getBaseQuery( search );
+		return getRouteMatch( query );
+	}
+
+	render() {
+		const { history, match } = this.state;
 
 		return <Layout history={ history } location={ history.location } match={ match } />;
 	}
