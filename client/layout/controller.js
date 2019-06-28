@@ -4,7 +4,7 @@
  */
 import { Component, createElement } from '@wordpress/element';
 import { parse, stringify } from 'qs';
-import { find, isEqual, last } from 'lodash';
+import { isEqual, last } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 
 /**
@@ -114,17 +114,11 @@ class Controller extends Component {
 	}
 
 	render() {
-		const { location, match } = this.props;
+		const { location, match, page } = this.props;
 		const query = getBaseQuery( location.search );
+		const { url, params } = match;
 
-		if ( ! match ) {
-			return this.render404();
-		}
-
-		const { path, url, params } = match;
-		const page = find( getPages(), { path } );
-
-		if ( ! page ) {
+		if ( ! match || ! page ) {
 			return this.render404();
 		}
 

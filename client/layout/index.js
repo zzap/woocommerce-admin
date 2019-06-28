@@ -101,13 +101,13 @@ export class Router extends Component {
 
 		// Initialize state.
 		const history = getHistory();
-		const match = this.getRouteMatch( window.location.search );
-		this.state = { history, match };
+		const { match, page } = this.getRouteMatch( window.location.search );
+		this.state = { history, match, page };
 
 		// listen for route changes and appropriately setState to re-render.
 		this.unlisten = history.listen( () => {
-			const nextMatch = this.getRouteMatch( window.location.search );
-			this.setState( { match: nextMatch } );
+			const { match: nextMatch, page: nextPage } = this.getRouteMatch( window.location.search );
+			this.setState( { match: nextMatch, page: nextPage } );
 		} );
 	}
 
@@ -118,24 +118,28 @@ export class Router extends Component {
 	getRouteMatch( search ) {
 		const query = getBaseQuery( search );
 		const pages = getPages();
-		let routeMatch = null;
+		let match = null;
+		let layoutPage = null;
 
 		const path = query.path ? query.path : '/';
 		pages.forEach( page => {
 			const matched = matchPath( path, { path: page.path, exact: true } );
 			if ( matched ) {
-				routeMatch = matched;
+				match = matched;
+				layoutPage = page;
 				return;
 			}
 		} );
 
-		return routeMatch;
+		return { match, page: layoutPage };
 	}
 
 	render() {
-		const { history, match } = this.state;
+		const { history, match, page } = this.state;
 
-		return <Layout history={ history } location={ history.location } match={ match } />;
+		return (
+			<Layout history={ history } location={ history.location } match={ match } page={ page } />
+		);
 	}
 }
 
