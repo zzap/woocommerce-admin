@@ -6,7 +6,6 @@ import { Component, createElement } from '@wordpress/element';
 import { parse, stringify } from 'qs';
 import { find, isEqual, last } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
-import { matchPath } from 'react-router-dom';
 
 /**
  * WooCommerce dependencies
@@ -75,15 +74,30 @@ const getPages = () => {
 	return pages;
 };
 
+export const getQuery = searchString => {
+	if ( ! searchString ) {
+		return {};
+	}
+
+	const search = searchString.substring( 1 );
+	return parse( search );
+};
+
+export const getBaseQuery = searchString => {
+	const query = getQuery( searchString );
+	delete query.page;
+	return query;
+};
+
 class Controller extends Component {
 	componentDidMount() {
 		window.document.documentElement.scrollTop = 0;
 	}
 
 	componentDidUpdate( prevProps ) {
-		const prevQuery = this.getQuery( prevProps.location.search );
-		const prevBaseQuery = this.getBaseQuery( prevProps.location.search );
-		const baseQuery = this.getBaseQuery( this.props.location.search );
+		const prevQuery = getQuery( prevProps.location.search );
+		const prevBaseQuery = getBaseQuery( prevProps.location.search );
+		const baseQuery = getBaseQuery( this.props.location.search );
 
 		if ( prevQuery.page > 1 && ! isEqual( prevBaseQuery, baseQuery ) ) {
 			getHistory().replace( getNewPath( { page: 1 } ) );
@@ -94,48 +108,15 @@ class Controller extends Component {
 		}
 	}
 
-	getQuery( searchString ) {
-		if ( ! searchString ) {
-			return {};
-		}
-
-		const search = searchString.substring( 1 );
-		return parse( search );
-	}
-
-	getBaseQuery( searchString ) {
-		const query = this.getQuery( searchString );
-		delete query.page;
-		return query;
-	}
-
-	// getRouteMatch( query ) {
-	// 	const pages = getPages();
-	// 	let routeMatch = null;
-	//
-	// 	const path = query.path ? query.path : '/';
-	// 	pages.forEach( page => {
-	// 		const matched = matchPath( path, { path: page.path, exact: true } );
-	// 		if ( matched ) {
-	// 			routeMatch = matched;
-	// 			return;
-	// 		}
-	// 	} );
-	//
-	// 	return routeMatch;
-	// }
-
 	// @todo What should we display or do when a route/page doesn't exist?
 	render404() {
 		return null;
 	}
 
 	render() {
-		console.log( 'rending' );
 		const { location, match } = this.props;
-		const query = this.getBaseQuery( location.search );
+		const query = getBaseQuery( location.search );
 
-		// Not sure this belongs here, will never get called.
 		if ( ! match ) {
 			return this.render404();
 		}
