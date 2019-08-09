@@ -45,7 +45,7 @@
 		&.is-complete {
 			.woocommerce-stepper__step-icon {
 				background: $muriel-hot-purple-600;
-				color: $muriel-white;
+				color: $studio-white;
 			}
 
 			.woocommerce-stepper__step-label {
@@ -64,7 +64,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: $muriel-white;
+		background: $studio-white;
 
 		svg > g {
 			transform: translateX(25%);

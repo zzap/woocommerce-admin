@@ -116,7 +116,7 @@
 
 	button.woocommerce-table__download-button.is-link {
 		padding: 6px $gap-small;
-		color: #000;
+		color: $studio-black;
 		text-decoration: none;
 
 		svg {
@@ -310,7 +310,7 @@ th.woocommerce-table__item {
 	padding: $gap 0;
 	text-align: center;
 	z-index: 1;
-	background: #fff;
+	background: $studio-white;
 	position: relative;
 }
 
