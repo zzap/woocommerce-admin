@@ -16,8 +16,7 @@ import { withDispatch } from '@wordpress/data';
 import { H, Stepper, Card } from '@woocommerce/components';
 import { NAMESPACE } from 'wc-api/onboarding/constants';
 import { recordEvent } from 'lib/tracks';
-
-const plugins = [ 'jetpack', 'woocommerce-services' ];
+import { PLUGINS, getPluginName } from './utils';
 
 class Plugins extends Component {
 	constructor() {
@@ -42,7 +41,7 @@ class Plugins extends Component {
 	componentDidUpdate( prevProps, prevState ) {
 		if (
 			this.state.pluginsInstalled !== prevState.pluginsInstalled &&
-			this.state.pluginsInstalled === plugins.length
+			this.state.pluginsInstalled === PLUGINS.length
 		) {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
@@ -54,14 +53,14 @@ class Plugins extends Component {
 
 		if (
 			this.state.pluginsActivated !== prevState.pluginsActivated &&
-			this.state.pluginsActivated === plugins.length
+			this.state.pluginsActivated === PLUGINS.length
 		) {
 			this.connectJetpack();
 		}
 	}
 
 	installPlugins() {
-		forEach( plugins, async plugin => {
+		forEach( PLUGINS, async plugin => {
 			const response = await this.doPluginAction( 'install', plugin );
 			if ( 'success' === response.status ) {
 				this.setState( state => ( {
@@ -86,7 +85,7 @@ class Plugins extends Component {
 
 		recordEvent( 'storeprofiler_install_plugin' );
 
-		forEach( plugins, async plugin => {
+		forEach( PLUGINS, async plugin => {
 			const response = await this.doPluginAction( 'activate', plugin );
 			if ( 'success' === response.status ) {
 				this.setState( state => ( {
@@ -100,11 +99,11 @@ class Plugins extends Component {
 		return 'install' === action
 			? sprintf(
 					__( 'There was an error installing %s. Please try again.', 'woocommerce-admin' ),
-					this.getPluginName( plugin )
+					getPluginName( plugin )
 				)
 			: sprintf(
 					__( 'There was an error activating %s. Please try again.', 'woocommerce-admin' ),
-					this.getPluginName( plugin )
+					getPluginName( plugin )
 				);
 	}
 
@@ -143,15 +142,6 @@ class Plugins extends Component {
 				isPending: false,
 				isError: true,
 			} );
-		}
-	}
-
-	getPluginName( plugin ) {
-		switch ( plugin ) {
-			case 'jetpack':
-				return __( 'Jetpack', 'woocommerce-admin' );
-			case 'woocommerce-services':
-				return __( 'WooCommerce Services', 'woocommerce-admin' );
 		}
 	}
 

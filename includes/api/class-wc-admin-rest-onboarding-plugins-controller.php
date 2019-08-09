@@ -114,26 +114,13 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 	}
 
 	/**
-	 * Get an array of plugins that can be installed & activated via the endpoints.
-	 */
-	public function get_allowed_plugins() {
-		return apply_filters(
-			'woocommerce_onboarding_plugins_whitelist',
-			array(
-				'jetpack'              => 'jetpack/jetpack.php',
-				'woocommerce-services' => 'woocommerce-services/woocommerce-services.php',
-			)
-		);
-	}
-
-	/**
 	 * Installs the requested plugin.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array Plugin Status
 	 */
 	public function install_plugin( $request ) {
-		$allowed_plugins = $this->get_allowed_plugins();
+		$allowed_plugins = WC_Admin_Onboarding::get_allowed_plugins();
 		$plugin          = sanitize_title_with_dashes( $request['plugin'] );
 		if ( ! in_array( $plugin, array_keys( $allowed_plugins ), true ) ) {
 			return new WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
@@ -194,7 +181,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 	 * @return array Plugin Status
 	 */
 	public function activate_plugin( $request ) {
-		$allowed_plugins = $this->get_allowed_plugins();
+		$allowed_plugins = WC_Admin_Onboarding::get_allowed_plugins();
 		$plugin          = sanitize_title_with_dashes( $request['plugin'] );
 		if ( ! in_array( $plugin, array_keys( $allowed_plugins ), true ) ) {
 			return new WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );

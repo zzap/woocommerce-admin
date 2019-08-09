@@ -14,12 +14,15 @@ import { withDispatch } from '@wordpress/data';
  * Internal depdencies
  */
 import { Card, H, Link } from '@woocommerce/components';
+import CardIcon from './images/card';
 import SecurityIcon from './images/security';
 import SalesTaxIcon from './images/local_atm';
 import SpeedIcon from './images/flash_on';
 import MobileAppIcon from './images/phone_android';
+import PrintIcon from './images/print';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
+//import { PLUGINS, getPluginName } from './utils';
 
 const benefits = [
 	{
@@ -29,6 +32,7 @@ const benefits = [
 			'Jetpack automatically blocks brute force attacks to protect your store from unauthorized access.',
 			'woocommerce-admin'
 		),
+		plugin: [ 'jetpack' ],
 	},
 	{
 		title: __( 'Sales Tax', 'woocommerce-admin' ),
@@ -37,6 +41,7 @@ const benefits = [
 			'With WooCommerce Services we ensure that the correct rate of tax is charged on all of your orders.',
 			'woocommerce-admin'
 		),
+		plugin: [ 'jetpack', 'woocommerce-services' ],
 	},
 	{
 		title: __( 'Speed', 'woocommerce-admin' ),
@@ -45,6 +50,7 @@ const benefits = [
 			'Cache your images and static files on our own powerful global network of servers and speed up your site.',
 			'woocommerce-admin'
 		),
+		plugin: [ 'jetpack' ],
 	},
 	{
 		title: __( 'Mobile App', 'woocommerce-admin' ),
@@ -53,6 +59,25 @@ const benefits = [
 			'Your store in your pocket. Manage orders, receive sales notifications, and more. Only with a Jetpack connection.',
 			'woocommerce-admin'
 		),
+		plugin: [ 'jetpack' ],
+	},
+	{
+		title: __( 'Print your own shipping labels', 'woocommerce-admin' ),
+		icon: <PrintIcon />,
+		description: __(
+			'Save time at the Post Office by printing USPS shipping labels at home.',
+			'woocommerce-admin'
+		),
+		plugin: [ 'woocommerce-services' ],
+	},
+	{
+		title: __( 'Simple payment setup', 'woocommerce-admin' ),
+		icon: <CardIcon />,
+		description: __(
+			'WooCommerce Services enables us to provision Stripe and Paypal accounts quickly and easily for you.',
+			'woocommerce-admin'
+		),
+		plugin: [ 'woocommerce-services' ],
 	},
 ];
 
@@ -128,6 +153,17 @@ class Start extends Component {
 		);
 	}
 
+	renderBenefits() {
+		/*const benefitsToShow = filter( benefits, benefit => {
+			return benefit.plugins
+		} );*/
+		return (
+			<div className="woocommerce-profile-wizard__benefits">
+				{ benefits.map( benefit => this.renderBenefit( benefit ) ) }
+			</div>
+		);
+	}
+
 	render() {
 		const { allowTracking } = this.state;
 
@@ -163,9 +199,7 @@ class Start extends Component {
 				</p>
 
 				<Card>
-					<div className="woocommerce-profile-wizard__benefits">
-						{ benefits.map( benefit => this.renderBenefit( benefit ) ) }
-					</div>
+					{ this.renderBenefits() }
 
 					<div className="woocommerce-profile-wizard__tracking">
 						<CheckboxControl
