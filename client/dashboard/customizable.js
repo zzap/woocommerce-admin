@@ -38,7 +38,7 @@ class CustomizableDashboard extends Component {
 		super( props );
 
 		this.state = {
-			sections: this.mergeSectionsWithDefaults( props.userPrefSections ),
+			sections: this.mergeSectionsWithDefaults( props.dashboardSections ),
 		};
 
 		this.onMove = this.onMove.bind( this );
@@ -271,17 +271,16 @@ class CustomizableDashboard extends Component {
 export default compose(
 	withSelect( select => {
 		const { getSetting } = select( SETTINGS_STORE_NAME );
+		const { dashboard_sections = [] } = getSetting( 'wc_admin', 'currentUserData' );
 		return {
 			locale: getSetting( 'wc_admin', 'locale' ),
+			dashboardSections: dashboard_sections,
 		};
 	} ),
 	withWCApiSelect( ( select, props ) => {
-		const { getCurrentUserData, getProfileItems, getOptions } = select( 'wc-api' );
-		const userData = getCurrentUserData();
+		const { getProfileItems, getOptions } = select( 'wc-api' );
 
-		const withSelectData = {
-			userPrefSections: userData.dashboard_sections,
-		};
+		const withSelectData = {};
 
 		if ( isOnboardingEnabled() ) {
 			const profileItems = getProfileItems();

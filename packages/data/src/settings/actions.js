@@ -13,6 +13,7 @@ import { concat } from 'lodash';
 import { NAMESPACE } from '../constants';
 import { STORE_NAME } from './constants';
 import TYPES from './action-types';
+import { dataPersistenceMap } from './data';
 
 export function updateSettingsForGroup( group, data, time = new Date() ) {
 	return {
@@ -68,30 +69,22 @@ export function* persistSettingsForGroup( group ) {
 
 	// get data slice for keys
 	const dirtyData = yield select( STORE_NAME, 'getSettingsForGroup', group, dirtyKeys );
-	const url = `${ NAMESPACE }/settings/${ group }/batch`;
 
-	const update = dirtyKeys.reduce( ( updates, key ) => {
-		const u = Object.keys( dirtyData[ key ] ).map( k => {
-			return { id: k, value: dirtyData[ key ][ k ] };
-		} );
-		return concat( updates, u );
-	}, [] );
-	try {
-		const results = yield apiFetch( {
-			path: url,
-			method: 'POST',
-			data: { update },
-		} );
-		if ( ! results ) {
-			throw new Error( 'settings did not update' );
+	for ( let i = 0; i < dirtyKeys.length; i++ ) {
+		try {
+			const key = dirtyKeys[ i ];
+			const getResults = dataPersistenceMap[ key ];
+			const results = yield getResults( group, key, dirtyData[ key ] );
+			if ( ! results ) {
+				throw new Error( 'settings did not update' );
+			}
+			// remove dirtyKeys from map - note we're only doing this if there is no error.
+			yield clearIsDirty( group );
+		} catch ( e ) {
+			yield updateErrorForGroup( group, null, e );
 		}
-		// remove dirtyKeys from map - note we're only doing this if there is no error.
-		yield clearIsDirty( group );
-	} catch ( e ) {
-		yield updateErrorForGroup( group, null, e );
+		yield setIsPersisting( group, false );
 	}
-	// finally set the persisting state
-	yield setIsPersisting( group, false );
 }
 
 export function clearSettings() {
