@@ -12,7 +12,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { Card, List, MenuItem, EllipsisMenu } from '@woocommerce/components';
+import { Card, List, MenuItem, EllipsisMenu, LinkButton } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
 
 /**
@@ -256,6 +256,58 @@ class TaskDashboard extends Component {
 		);
 	}
 
+	onSkipStoreSetup = () => {
+		const completedTasksNames = this.getTasks()
+			.filter( x => x.completed )
+			.map( x => x.title );
+
+		recordEvent( 'wcadmin_tasklist_skip', {
+			completed_tasks: completedTasksNames.length,
+			completed_tasks_names: completedTasksNames,
+			skip_option: 'skip store setup'
+		} );
+
+		this.props.updateOptions( {
+			woocommerce_task_list_skip_store_setup: true,
+		} );
+	};
+
+	onDoThisLater = () => {
+		const completedTasksNames = this.getTasks()
+			.filter( x => x.completed )
+			.map( x => x.title );
+
+		recordEvent( 'wcadmin_tasklist_skip', {
+			completed_tasks: completedTasksNames.length,
+			completed_tasks_names: completedTasksNames,
+			skip_option: 'i\'ll do this later'
+		} );
+
+		this.props.updateOptions( {
+			woocommerce_task_list_do_this_later: true,
+		} );
+	};
+
+	renderSkipActions() {
+		const { skipStoreSetup, doThisLater } = this.props;
+
+		return (
+			<div style={ { textAlign: 'center' } }>
+				{ ! skipStoreSetup && (
+					<LinkButton onClick={ this.onSkipStoreSetup }>
+						{ __( 'Skip store setup', 'woocommerce-admin' ) }
+					</LinkButton>				
+				) }
+				{ ! skipStoreSetup && ! doThisLater && ' | ' }
+				{ ! doThisLater && (
+					<LinkButton onClick={ this.onDoThisLater }>
+						{ __( 'I\'ll do this later', 'woocommerce-admin' ) }
+					</LinkButton>
+				) }
+			</div>
+		);
+	}
+
 	render() {
 		const { inline } = this.props;
 		const { isCartModalOpen, isWelcomeModalOpen } = this.state;
@@ -304,6 +356,7 @@ class TaskDashboard extends Component {
 							</Card>
 							{ inline && this.renderPrompt() }
 							{ isWelcomeModalOpen && this.renderWelcomeModal() }
+							{ this.renderSkipActions() }
 						</Fragment>
 					) }
 				</div>
@@ -326,6 +379,8 @@ export default compose(
 		const options = getOptions( [
 			'woocommerce_task_list_prompt_shown',
 			'woocommerce_task_list_welcome_modal_dismissed',
+			'woocommerce_task_list_skip_store_setup',
+			'woocommerce_task_list_do_this_later',
 		] );
 		const promptShown = get(
 			options,
@@ -337,15 +392,17 @@ export default compose(
 			[ 'woocommerce_task_list_welcome_modal_dismissed' ],
 			false
 		);
-		const taskListPayments = getOptions( [
-			'woocommerce_task_list_payments',
-		] );
+		const taskListPayments = getOptions( [ 'woocommerce_task_list_payments' ] );
+		const skipStoreSetup = get( options, [ 'woocommerce_task_list_skip_store_setup' ], false );
+		const doThisLater = get( options, [ 'woocommerce_task_list_do_this_later' ], false );
 
 		return {
 			modalDismissed,
 			profileItems,
 			promptShown,
 			taskListPayments,
+			skipStoreSetup,
+			doThisLater,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
