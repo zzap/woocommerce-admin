@@ -63,6 +63,7 @@ class OnboardingTasks {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_homepage_notice_admin_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_tax_notice_admin_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_product_import_notice_admin_script' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_menu_experience_script' ) );
 
 		// Update payment cache on payment gateways update.
 		add_action( 'update_option_woocommerce_stripe_settings', array( $this, 'check_stripe_completion' ), 10, 2 );
@@ -328,6 +329,20 @@ class OnboardingTasks {
 			delete_transient( self::ACTIVE_TASK_TRANSIENT );
 			wp_enqueue_script( 'onboarding-product-import-notice', Loader::get_url( 'wp-admin-scripts/onboarding-product-import-notice.js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
 		}
+	}
+
+	/**
+	 * Focuses attention on the task list when onboarding.
+	 */
+	public function add_onboarding_menu_experience_script() {
+		wp_enqueue_script(
+			'onboarding-menu-experience',
+			Loader::get_url( 'wp-admin-scripts/onboarding-menu-experience.js' ),
+			// TODO require wc-api here vvvvvvvvv?
+			array( 'lodash', 'wp-data', 'moment', 'wc-currency' ),
+			Loader::get_file_version( 'wp-admin-scripts/onboarding-menu-experience.js' ),
+			true
+		);
 	}
 
 	/**
