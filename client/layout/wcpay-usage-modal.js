@@ -5,40 +5,26 @@ import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
+import { getQuery, updateQueryString } from '@woocommerce/navigation';
 import interpolateComponents from 'interpolate-components';
 import { Button, Modal } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
-const DEFAULT_TITLE = __( 'Build a better WooCommerce', 'woocommerce-admin' );
-
-const DEFAULT_TRACKING_MESSAGE = interpolateComponents( {
-	mixedString: __(
-		'Get improved features and faster fixes by sharing non-sensitive data via {{link}}usage tracking{{/link}} ' +
-			'that shows us how WooCommerce is used. No personal data is tracked or stored.',
-		'woocommerce-admin'
-	),
-	components: {
-		link: (
-			<Link
-				href="https://woocommerce.com/usage-tracking"
-				target="_blank"
-				type="external"
-			/>
-		),
-	},
-} );
-
-class UsageModal extends Component {
+class WCPayUsageModal extends Component {
 	constructor( props ) {
 		super( props );
+		const query = getQuery();
 		this.state = {
+			isOpen:
+				! props.allowTracking &&
+				query[ 'wcpay-request-tracking' ] === 'yes',
 			isLoadingScripts: false,
 		};
 	}
 
 	async componentDidUpdate( prevProps, prevState ) {
-		const { hasErrors, isRequesting, onClose, createNotice } = this.props;
+		const { hasErrors, isRequesting, createNotice } = this.props;
 		const { isLoadingScripts } = this.state;
 		const isRequestSuccessful =
 			! isRequesting &&
@@ -49,7 +35,7 @@ class UsageModal extends Component {
 			! isRequesting && prevProps.isRequesting && hasErrors;
 
 		if ( isRequestSuccessful ) {
-			onClose();
+			this.closeModal();
 		}
 
 		if ( isRequestError ) {
@@ -60,7 +46,7 @@ class UsageModal extends Component {
 					'woocommerce-admin'
 				)
 			);
-			onClose();
+			this.closeModal();
 		}
 	}
 
@@ -77,25 +63,42 @@ class UsageModal extends Component {
 		updateOptions( { woocommerce_allow_tracking: 'yes' } );
 	}
 
+	closeModal() {
+		this.setState( { isOpen: false } );
+		updateQueryString( { 'wcpay-request-tracking': undefined } );
+	}
+
 	render() {
-		// Bail if site has already opted in to tracking
-		if ( this.props.allowTracking ) {
-			const { onClose } = this.props;
-			onClose();
+		const { isOpen } = this.state;
+		if ( ! isOpen ) {
 			return null;
 		}
 
-		const {
-			isRequesting,
-			title = DEFAULT_TITLE,
-			trackingMessage = DEFAULT_TRACKING_MESSAGE,
-		} = this.props;
+		const { isRequesting } = this.props;
+
+		const title = __( 'Build a better WooCommerce', 'woocommerce-admin' );
+		const trackingMessage = interpolateComponents( {
+			mixedString: __(
+				'Get improved features and faster fixes by sharing non-sensitive data via {{link}}usage tracking{{/link}} ' +
+					'that shows us how WooCommerce is used. No personal data is tracked or stored.',
+				'woocommerce-admin'
+			),
+			components: {
+				link: (
+					<Link
+						href="https://woocommerce.com/usage-tracking"
+						target="_blank"
+						type="external"
+					/>
+				),
+			},
+		} );
 
 		return (
 			<Modal
 				title={ title }
 				isDismissible={ false }
-				onRequestClose={ () => this.props.onClose() }
+				onRequestClose={ () => this.closeModal() }
 				className="woocommerce-profile-wizard__usage-modal"
 			>
 				<div className="woocommerce-profile-wizard__usage-wrapper">
@@ -105,7 +108,7 @@ class UsageModal extends Component {
 					<div className="components-guide__footer">
 						<Button
 							isBusy={ isRequesting }
-							onClick={ () => this.props.onClose() }
+							onClick={ () => this.closeModal() }
 						>
 							{ __( 'No thanks', 'woocommerce-admin' ) }
 						</Button>
@@ -152,4 +155,4 @@ export default compose(
 			updateOptions,
 		};
 	} )
-)( UsageModal );
+)( WCPayUsageModal );

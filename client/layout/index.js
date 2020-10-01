@@ -26,6 +26,7 @@ import { Controller, getPages } from './controller';
 import { Header } from '../header';
 import Notices from './notices';
 import TransientNotices from './transient-notices';
+import WCPayUsageModal from './wcpay-usage-modal';
 
 const StoreAlerts = lazy( () =>
 	import( /* webpackChunkName: "store-alerts" */ './store-alerts' )
@@ -137,6 +138,7 @@ class _Layout extends Component {
 						</div>
 					</PrimaryLayout>
 				) }
+				<WCPayUsageModal />
 			</div>
 		);
 	}
