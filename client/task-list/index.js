@@ -30,6 +30,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import './style.scss';
 import CartModal from '../dashboard/components/cart-modal';
+import UsageModal from '../dashboard/components/usage-modal';
 import { getAllTasks, recordTaskViewEvent } from './tasks';
 import { getCountryCode } from '../dashboard/utils';
 import sanitizeHTML from '../lib/sanitize-html';
@@ -38,6 +39,7 @@ class TaskDashboard extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
+			isUsageModalOpen: props.query[ 'wcpay-request-tracking' ] === 'yes',
 			isCartModalOpen: false,
 		};
 	}
@@ -251,6 +253,12 @@ class TaskDashboard extends Component {
 		);
 	}
 
+	toggleUsageModal() {
+		this.setState( {
+			isUsageModalOpen: ! this.state.isUsageModalOpen,
+		} );
+	}
+
 	toggleCartModal() {
 		const { isCartModalOpen } = this.state;
 
@@ -263,7 +271,7 @@ class TaskDashboard extends Component {
 
 	render() {
 		const { query } = this.props;
-		const { isCartModalOpen } = this.state;
+		const { isCartModalOpen, isUsageModalOpen } = this.state;
 		const currentTask = this.getCurrentTask();
 		const listTasks = this.getVisibleTasks().map( ( task ) => {
 			task.className = classNames(
@@ -368,6 +376,9 @@ class TaskDashboard extends Component {
 						</Fragment>
 					) }
 				</div>
+				{ isUsageModalOpen && (
+					<UsageModal onClose={ () => this.toggleUsageModal() } />
+				) }
 				{ isCartModalOpen && (
 					<CartModal
 						onClose={ () => this.toggleCartModal() }
