@@ -111,13 +111,13 @@ class WCPayUsageModal extends Component {
 				title={ title }
 				isDismissible={ false }
 				onRequestClose={ () => this.closeModal() }
-				className="woocommerce-profile-wizard__usage-modal"
+				className="woocommerce-payments__usage-modal"
 			>
-				<div className="woocommerce-profile-wizard__usage-wrapper">
-					<div className="woocommerce-profile-wizard__usage-modal-message">
+				<div className="woocommerce-payments__usage-wrapper">
+					<div className="woocommerce-payments__usage-modal-message">
 						{ trackingMessage }
 					</div>
-					<div className="components-guide__footer">
+					<div className="woocommerce-payments__usage-footer">
 						<Button
 							isBusy={ isBusy }
 							onClick={ () => this.closeModal() }
