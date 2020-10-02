@@ -20,12 +20,19 @@ class WCPayUsageModal extends Component {
 				! props.allowTracking &&
 				query[ 'wcpay-request-tracking' ] === 'yes',
 			isLoadingScripts: false,
+			isRequestStarted: false,
 		};
 	}
 
 	async componentDidUpdate( prevProps, prevState ) {
 		const { hasErrors, isRequesting, createNotice } = this.props;
-		const { isLoadingScripts } = this.state;
+		const { isLoadingScripts, isRequestStarted } = this.state;
+
+		// We can't rely on isRequesting props only because option update might be triggered by other component.
+		if ( ! isRequestStarted ) {
+			return;
+		}
+
 		const isRequestSuccessful =
 			! isRequesting &&
 			! isLoadingScripts &&
@@ -36,6 +43,7 @@ class WCPayUsageModal extends Component {
 
 		if ( isRequestSuccessful ) {
 			this.closeModal();
+			this.setState( { isRequestStarted: false } );
 		}
 
 		if ( isRequestError ) {
@@ -60,22 +68,24 @@ class WCPayUsageModal extends Component {
 			} );
 		}
 
+		this.setState( { isRequestStarted: true } );
 		updateOptions( { woocommerce_allow_tracking: 'yes' } );
 	}
 
 	closeModal() {
-		this.setState( { isOpen: false } );
+		this.setState( { isOpen: false, isRequestStarted: false } );
 		updateQueryString( { 'wcpay-request-tracking': undefined } );
 	}
 
 	render() {
-		const { isOpen } = this.state;
+		const { isOpen, isRequestStarted } = this.state;
+		const { isRequesting } = this.props;
+
 		if ( ! isOpen ) {
 			return null;
 		}
 
-		const { isRequesting } = this.props;
-
+		const isBusy = isRequestStarted && isRequesting;
 		const title = __( 'Build a better WooCommerce', 'woocommerce-admin' );
 		const trackingMessage = interpolateComponents( {
 			mixedString: __(
@@ -107,7 +117,7 @@ class WCPayUsageModal extends Component {
 					</div>
 					<div className="components-guide__footer">
 						<Button
-							isBusy={ isRequesting }
+							isBusy={ isBusy }
 							onClick={ () => this.closeModal() }
 						>
 							{ __( 'No thanks', 'woocommerce-admin' ) }
@@ -115,7 +125,7 @@ class WCPayUsageModal extends Component {
 
 						<Button
 							isPrimary
-							isBusy={ isRequesting }
+							isBusy={ isBusy }
 							onClick={ () => this.enableTracking() }
 						>
 							{ __( 'I agree', 'woocommerce-admin' ) }

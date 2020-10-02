@@ -19,7 +19,7 @@ class WCPay extends Component {
 					'woocommerce-admin'
 				)
 			);
-			markConfigured( 'wcpay' );
+			markConfigured( 'wcpay', { 'wcpay-request-tracking': 'yes' } );
 		}
 	}
 
