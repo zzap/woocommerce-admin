@@ -86,11 +86,13 @@ class WCPayUsageModal extends Component {
 		}
 
 		const isBusy = isRequestStarted && isRequesting;
-		const title = __( 'Build a better WooCommerce', 'woocommerce-admin' );
+		const title = __(
+			'Help us build a better WooCommerce Payments experience',
+			'woocommerce-admin'
+		);
 		const trackingMessage = interpolateComponents( {
 			mixedString: __(
-				'Get improved features and faster fixes by sharing non-sensitive data via {{link}}usage tracking{{/link}} ' +
-					'that shows us how WooCommerce is used. No personal data is tracked or stored.',
+				'By agreeing to share non-sensitive {{link}}usage data{{/link}}, you’ll help us improve features and optimize the WooCommerce Payments experience. You can opt out at any time.',
 				'woocommerce-admin'
 			),
 			components: {
