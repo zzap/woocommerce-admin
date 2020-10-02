@@ -18,7 +18,7 @@ class WCPayUsageModal extends Component {
 		this.state = {
 			isOpen:
 				! props.allowTracking &&
-				query[ 'wcpay-request-tracking' ] === 'yes',
+				query[ 'wcpay-connection-success' ] === '1',
 			isLoadingScripts: false,
 			isRequestStarted: false,
 		};
@@ -74,7 +74,7 @@ class WCPayUsageModal extends Component {
 
 	closeModal() {
 		this.setState( { isOpen: false, isRequestStarted: false } );
-		updateQueryString( { 'wcpay-request-tracking': undefined } );
+		updateQueryString( { 'wcpay-connection-success': undefined } );
 	}
 
 	render() {
