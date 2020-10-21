@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	Fragment,
 	Suspense,
 	lazy,
 	useState,
@@ -79,12 +78,7 @@ export const Layout = ( {
 
 	const renderColumns = () => {
 		return (
-			<Fragment>
-				{ showInbox && (
-					<div className="woocommerce-homescreen-column is-inbox">
-						<InboxPanel />
-					</div>
-				) }
+			<>
 				<div
 					className="woocommerce-homescreen-column"
 					ref={ content }
@@ -93,10 +87,13 @@ export const Layout = ( {
 					} }
 				>
 					{ isTaskListEnabled && renderTaskList() }
-					<StatsOverview />
 					{ ! isTaskListEnabled && <QuickLinks /> }
 				</div>
-			</Fragment>
+				<div className="woocommerce-homescreen-column">
+					<StatsOverview />
+					<InboxPanel />
+				</div>
+			</>
 		);
 	};
 
