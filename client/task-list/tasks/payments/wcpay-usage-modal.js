@@ -48,6 +48,7 @@ const WCPayUsageModal = () => {
 
 	return (
 		<UsageModal
+			isDismissible={ false }
 			title={ title }
 			message={ trackingMessage }
 			acceptActionText={ __( 'I agree', 'woocommerce-admin' ) }

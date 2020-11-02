@@ -123,16 +123,16 @@ class UsageModal extends Component {
 		return (
 			<Modal
 				title={ title }
+				isDismissible={ this.props.isDismissible }
 				onRequestClose={ () => this.props.onClose() }
-				className="woocommerce-profile-wizard__usage-modal"
+				className="woocommerce-usage-modal"
 			>
-				<div className="woocommerce-profile-wizard__usage-wrapper">
-					<div className="woocommerce-profile-wizard__usage-modal-message">
+				<div className="woocommerce-usage-modal__wrapper">
+					<div className="woocommerce-usage-modal__message">
 						{ trackingMessage }
 					</div>
-					<div className="woocommerce-profile-wizard__usage-modal-actions">
+					<div className="woocommerce-usage-modal__actions">
 						<Button
-							isTertiary
 							isBusy={ isBusy }
 							onClick={ () =>
 								this.updateTracking( { allowTracking: false } )
